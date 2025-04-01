@@ -19,6 +19,8 @@ WiFiManager::WiFiManager()
 
 void WiFiManager::setup()
 {
+    Serial.print("Attempting to setup wifi with mode:");
+    Serial.println(settings.wifiMode);
     if (settings.wifiMode == 1) //connect to an AP
     {        
         Serial.println("Attempting to connect to a WiFi AP.");
@@ -47,13 +49,24 @@ void WiFiManager::setup()
     }
     if (settings.wifiMode == 2) //BE an AP
     {
+        Serial.println("Attempting to Craete AP:");
         WiFi.mode(WIFI_AP);
         WiFi.setSleep(true);
+        Serial.print("Attempting to Craete AP with ssid and pass :");
+        Serial.print(settings.SSID);
+        Serial.print(":");
+        Serial.println(settings.WPA2Key);
         WiFi.softAP((const char *)settings.SSID, (const char *)settings.WPA2Key);
+        Serial.print("Attempting to Craete AP Done");
+
         if (SysSettings.fancyLED)
         {
+            Serial.print("Attempting to Craete FancyLed");
+
             leds[SysSettings.LED_CONNECTION_STATUS] = CRGB::Green;
             FastLED.show();
+            Serial.print("Attempting to Craete FancyLed DONE" );
+
         }
     }
 }
@@ -101,8 +114,8 @@ void WiFiManager::loop()
                 wifiServer.begin(23); //setup as a telnet server
                 wifiServer.setNoDelay(true);
                 Serial.println("TCP server started");
-                wifiOBDII.begin(1000); //setup for wifi linked ELM327 emulation
-                wifiOBDII.setNoDelay(true);
+                //wifiOBDII.begin(1000); //setup for wifi linked ELM327 emulation
+                //wifiOBDII.setNoDelay(true);
                 ArduinoOTA.setPort(3232);
                 ArduinoOTA.setHostname(deviceName);
                 // No authentication by default

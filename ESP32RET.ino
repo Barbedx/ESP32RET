@@ -238,21 +238,16 @@ void loadSettings()
         strcpy(otaFilename, "/esp32s3ret.bin");
     }
 
-    if (nvPrefs.getString("SSID", settings.SSID, 32) == 0)
-    {
-        strcpy(settings.SSID, deviceName);
-        strcat(settings.SSID, "SSID");
-    }
 
-    if (nvPrefs.getString("wpa2Key", settings.WPA2Key, 64) == 0)
-    {
-        strcpy(settings.WPA2Key, "aBigSecret");
-    }
-    if (nvPrefs.getString("btname", settings.btName, 32) == 0)
-    {
+        strcpy(settings.SSID, "espRET"); 
+
+
+        strcpy(settings.WPA2Key, "mrdiy.ca");
+    
+
         strcpy(settings.btName, "ELM327-");
         strcat(settings.btName, deviceName);
-    }
+
 
     char buff[80];
     for (int i = 0; i < SysSettings.numBuses; i++)
@@ -268,12 +263,17 @@ void loadSettings()
         sprintf(buff, "can%i-fdmode", i);
         settings.canSettings[i].fdMode = nvPrefs.getBool(buff, false);
     }
-
+    
+    Logger::console("Loading settings1....");
     nvPrefs.end();
-
+    Logger::console("Loading settings2....");
+    
     Logger::setLoglevel((Logger::LogLevel)settings.logLevel);
-
+    Logger::console("Loading settings3....");
+    
     for (int rx = 0; rx < NUM_BUSES; rx++) SysSettings.lawicelBusReception[rx] = true; //default to showing messages on RX 
+    Logger::console("Loading settings Finished");
+
 }
 
 void setup()
@@ -285,8 +285,8 @@ void setup()
     //to deal with this issue.
     Serial.setTxTimeoutMs(2);
 #endif
-    Serial.begin(1000000); //for production
-    //Serial.begin(115200); //for testing
+    //Serial.begin(1000000); //for production
+    Serial.begin(115200); //for testing
     //delay(2000); //just for testing. Don't use in production
 
     espChipRevision = ESP.getChipRevision();
@@ -301,27 +301,21 @@ void setup()
     //CAN0.setDebuggingMode(true);
     //CAN1.setDebuggingMode(true);
 
-    canManager.setup();
 
-    if (settings.enableBT) 
-    {
-        Serial.println("Starting bluetooth");
-        elmEmulator.setup();
-        if (SysSettings.fancyLED && (settings.wifiMode == 0) )
-        {
-            leds[0] = CRGB::Green;
-            FastLED.show();
-        }
-    }
-    
-    /*else*/ wifiManager.setup();
+    wifiManager.setup();
+    Logger::console("wifi Setup Finished");
+
+    canManager.setup();
+    Logger::console("Can Setup Finished");
+
 
     SysSettings.lawicelMode = false;
     SysSettings.lawicelAutoPoll = false;
     SysSettings.lawicelTimestamping = false;
     SysSettings.lawicelPollCounter = 0;
+    Logger::console("lavicel Setup Finished");
     
-    elmEmulator.setup();
+    //elmEmulator.setup(); 
 
     Serial.print("Free heap after setup: ");
     Serial.println(esp_get_free_heap_size());
@@ -398,5 +392,5 @@ void loop()
         serialGVRET.processIncomingByte(in_byte);
     }
 
-    elmEmulator.loop();
+    //elmEmulator.loop();
 }
